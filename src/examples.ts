@@ -161,6 +161,59 @@ function triggerGate(): Diagram {
   return b.d;
 }
 
+function farmIdle(): Diagram {
+  const b = new Build('Farm Idle — core earning loop');
+  b.d.variables.push(
+    { name: 'grow_time', value: '3' },
+    { name: 'cooldown', value: '3' },
+    { name: 'crop_seed_cost', value: '10' },
+    { name: 'price_mult', value: '5' },
+  );
+
+  const empty = b.n('pool', 80, 150, { label: 'Empty Plots', activation: 'passive', resources: 9, color: 'green' });
+  const plant = b.n('converter', 200, 210, { label: 'Plant', activation: 'automatic', color: 'green' });
+  const grow = b.n('delay', 330, 180, { label: 'Growing' });
+  const ready = b.n('pool', 470, 180, { label: 'Ready to Harvest', activation: 'passive', color: 'green' });
+  const harvest = b.n('converter', 610, 180, { label: 'Harvest', activation: 'automatic', color: 'orange' });
+  const cooldown = b.n('delay', 760, 100, { label: 'Plot Cooldown' });
+  const grade = b.n('gate', 760, 330, { label: 'Grade Roll', random: true });
+  const high = b.n('pool', 900, 250, { label: 'Harvest: High', activation: 'passive', color: 'orange' });
+  const good = b.n('pool', 900, 330, { label: 'Harvest: Good', activation: 'passive', color: 'orange' });
+  const poor = b.n('pool', 900, 410, { label: 'Harvest: Poor', activation: 'passive', color: 'orange' });
+  const sell = b.n('converter', 1040, 330, { label: 'Sell', activation: 'automatic', color: 'blue' });
+  const money = b.n('pool', 1180, 330, { label: 'Money ($)', activation: 'passive', resources: 50, color: 'blue' });
+  const buy = b.n('converter', 1320, 330, { label: 'Buy Seed', activation: 'interactive', color: 'green' });
+
+  b.r(empty, plant, '1', { filter: true, color: 'green' });
+  b.r(plant, grow, '1', { filter: true, color: 'green' });
+  b.r(grow, ready, 'grow_time');
+  b.r(ready, harvest, '1', { filter: true, color: 'green' });
+  b.r(harvest, cooldown, '1', { filter: true, color: 'green' });
+  b.r(cooldown, empty, 'cooldown');
+  b.r(harvest, grade, '1', { color: 'orange' });
+  b.r(grade, high, '40%', { color: 'orange' });
+  b.r(grade, good, '35%', { color: 'orange' });
+  b.r(grade, poor, '25%', { color: 'orange' });
+
+  const sellHigh = b.r(high, sell, '1', { filter: true, color: 'orange' });
+  const sellGood = b.r(good, sell, '1', { filter: true, color: 'orange' });
+  const sellPoor = b.r(poor, sell, '1', { filter: true, color: 'orange' });
+  b.s(high, sellHigh, '>0');
+  b.s(good, sellGood, '>0');
+  b.s(poor, sellPoor, '>0');
+
+  b.r(sell, money, 'price_mult');
+  b.r(money, buy, 'crop_seed_cost');
+  b.r(buy, empty, '1', { filter: true, color: 'green' });
+
+  b.d.nodes.find((n) => n.id === money)!.showInChart = true;
+  b.d.nodes.find((n) => n.id === empty)!.showInChart = true;
+  b.n('text', 470, 40, {
+    text: 'Plant pulls a plot through Growing (grow_time) to Ready to Harvest.\nHarvest returns the plot to cooldown and rolls a grade (40/35/25) into High/Good/Poor.\nSell turns produce into Money; click Buy Seed to reinvest money into plots.',
+  });
+  return b.d;
+}
+
 export const EXAMPLES: { name: string; build: () => Diagram }[] = [
   { name: 'Hourglass', build: hourglass },
   { name: 'Monopoly feedback loop', build: monopoly },
@@ -170,4 +223,5 @@ export const EXAMPLES: { name: string; build: () => Diagram }[] = [
   { name: 'Economy with end condition', build: harvest },
   { name: 'Registers', build: registerExample },
   { name: 'Trigger gate & dice', build: triggerGate },
+  { name: 'Farm Idle — core earning loop', build: farmIdle },
 ];
