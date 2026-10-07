@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Machinations Lab</title>
+    <link rel="stylesheet" href="/src/ui/styles.css" />
+  </head>
+  <body>
+    <header id="toolbar">
+      <span class="brand">Machinations Lab</span>
+      <button data-cmd="new" title="New diagram">New</button>
+      <button data-cmd="open" title="Open JSON">Open</button>
+      <button data-cmd="save" title="Save JSON (Ctrl+S)">Save</button>
+      <select id="examples" title="Load an example"><option value="">Examples…</option></select>
+      <span class="sep"></span>
+      <button data-cmd="play" id="btn-play" class="primary" title="Play / pause (Space)">▶ Play</button>
+      <button data-cmd="step" title="Single step (N)">Step</button>
+      <button data-cmd="reset" title="Stop and reset (Esc)">■ Reset</button>
+      <label class="speed">Speed <input id="speed" type="range" min="0" max="100" value="50" /></label>
+      <span id="stepcount">Step 0</span>
+      <span class="sep"></span>
+      <button data-cmd="batch" title="Run many simulations quickly">Quick Run…</button>
+      <span id="status"></span>
+      <input type="file" id="file" accept=".json,application/json" hidden />
+    </header>
+    <main>
+      <nav id="palette"></nav>
+      <section id="canvas-wrap">
+        <svg id="canvas" tabindex="0"></svg>
+        <div id="hint"></div>
+      </section>
+      <aside id="props"></aside>
+    </main>
+    <footer id="chart-wrap">
+      <canvas id="chart"></canvas>
+      <div id="legend"></div>
+    </footer>
+    <div id="modal" hidden><div class="modal-body"></div></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
